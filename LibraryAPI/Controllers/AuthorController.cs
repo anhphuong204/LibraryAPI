@@ -1,98 +1,61 @@
-﻿using LibraryAPI.Models;
-using LibraryAPI.Services;
-using Microsoft.AspNetCore.Http;
+﻿using LibraryAPI.Data;
+using LibraryAPI.Models;
+using LibraryAPI.Models.DTO;
+using LibraryAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LibraryAPI.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	public class AuthorController :  ControllerBase
+	public class AuthorController : ControllerBase
 	{
-		private readonly ILibraryServices _libraryServices;
+		private readonly LibraryDbContext _libraryDbContext;
+		private readonly IAuthorRepository _authorRepository;
+
+		public AuthorController(LibraryDbContext libraryDbContext, IAuthorRepository authorRepository)
+		{
+			_libraryDbContext = libraryDbContext;
+			_authorRepository = authorRepository;
+		}
+
+		[HttpGet("get_all_authors")]
+		public IActionResult GetAllAuthors()
+		{
+			var allAuthors = _authorRepository.GetAllAuthors();
+			return Ok(allAuthors);
+		}
+
+		[HttpGet("get-author-by-id/{id}")]
+		public IActionResult GetAuthorById([FromRoute]int id)
+		{
+			var authorWithIdDTO = _authorRepository.GetAuthorById(id);
+			return Ok(authorWithIdDTO);
+		}
 		
-		public AuthorController(ILibraryServices libraryServices)
+
+		[HttpPost("add-author")]
+		public IActionResult AddAuthor([FromRoute] AddAuthorRequestDTO addAuthorRequestDTO)
 		{
-			_libraryServices = libraryServices;
+			var authorAdd = _authorRepository.AddAuthor(addAuthorRequestDTO);
+			return Ok(authorAdd);
 		}
+		
 
-		[HttpGet]
-		public async Task<IActionResult> GetAuthors()
+		[HttpPut("update-author-by-id/{id}")]
+		public IActionResult UpdateAuthorById(int id, [FromBody] AddAuthorRequestDTO authorDTO)
 		{
-			var authors = await _libraryServices.GetAuthorsAsync();
-			if (authors == null)
-			{
-				return StatusCode(StatusCodes.Status204NoContent, "No authors in database");
-			}
-
-			return StatusCode(StatusCodes.Status200OK, authors);
+			var updateAuthor = _authorRepository.UpdateAuthorById(id, authorDTO);
+			return Ok(updateAuthor);
 		}
-
-		[HttpGet("id")]
-		public async Task<IActionResult> GetAuthor(int id, bool includeBooks = false)
+	
+		[HttpDelete("delete-author-by-id/{id}")]
+		public IActionResult DeleteAuthorById(int id)
 		{
-			Authors author = await _libraryServices.GetAuthorAsync(id, includeBooks);
-			
-			if (author == null)
-			{
-				return StatusCode(StatusCodes.Status204NoContent, $"No Author found for id: {id}");
-			}
-
-			return StatusCode(StatusCodes.Status200OK, author);
-		}
-
-
-		[HttpPost]
-		public async Task<ActionResult<Authors>> AddAuthor(Authors author)
-		{
-			var dbAuthor = await _libraryServices.AddAuthorAsync(author);
-			
-			if (dbAuthor == null)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, $"{author.FullName} could not be added.");
-			}
-
-			return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
-		}
-
-		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateBook(int id, Book book)
-		{
-			if (id != book.Id)
-			{
-				return BadRequest();
-			}
-
-			var updatedBook = await _libraryServices.UpdateBookAsync(book);
-
-			if (updatedBook == null)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, $"{book.Title} could not be updated.");
-			}
-
-			return NoContent();
-		}
-
-		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteBook(int id)
-		{
-			var book = await _libraryServices.GetBookAsync(id);
-			if (book == null)
-			{
-				return NotFound($"No book found for id: {id}");
-			}
-
-			var (status, message) = await _libraryServices.DeleteBookAsync(book);
-
-			if (!status)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, message);
-			}
-
-			return Ok(book);
+			var deleteAuthor = _authorRepository.DeleteAuthorById(id);
+			return Ok(deleteAuthor);
 		}
 	}
 }
-

@@ -1,4 +1,5 @@
 using LibraryAPI.Data;
+using LibraryAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -15,6 +16,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<LibraryDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//
+builder.Services.AddScoped<IBookRepository, SQLBookRepository>();
+builder.Services.AddScoped<IAuthorRepository,  SQLAuthorRepository>();
+builder.Services.AddScoped<IPublisherRepository, SQLPublisherRepository>();
 
 var app = builder.Build();
 

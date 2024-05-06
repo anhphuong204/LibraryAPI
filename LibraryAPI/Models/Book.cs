@@ -13,12 +13,12 @@ namespace LibraryAPI.Models
 		public bool? IsRead { get; set; }
 		public DateTime? DateRead { get; set; }
 		public int? Rate { get; set; }
-		public GenreType Genre { get; set; }
+		public string? Genre { get; set; }
 		public string? CoverUrl { get; set; }
 		public DateTime DateAdded { get; set; }
 		public int PublisherId { get; set; }
 		public Publishers  Publisher { get; set; }
-		public ICollection<Book_Author> Book_Authors { get; set; }
+		public List <Book_Author> Book_Authors { get; set; }
 	}
 
 	public enum GenreType

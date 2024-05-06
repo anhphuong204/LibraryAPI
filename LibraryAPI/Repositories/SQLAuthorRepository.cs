@@ -1,6 +1,7 @@
 ﻿using LibraryAPI.Data;
 using LibraryAPI.Models;
 using LibraryAPI.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,62 +10,65 @@ namespace LibraryAPI.Repositories
 	public class SQLAuthorRepository : IAuthorRepository
 	{
 		private readonly LibraryDbContext _libraryDbContext;
-
 		public SQLAuthorRepository(LibraryDbContext libraryDbContext)
 		{
 			_libraryDbContext = libraryDbContext;
 		}
-
-		public List<AuthorWithBookAndPublisher> GetAllAuthors()
+		public List<AuthorDTO> GellAllAuthors()
 		{
-			var allAuthors = _libraryDbContext.Authors
-				.Select(author => new AuthorWithBookAndPublisher
-				{
-					FullName = author.FullName
-				}).ToList();
-
-			return allAuthors;
-		}
-
-		public AuthorWithBookAndPublisher GetAuthorById(int id)
-		{
-			var authorWithDomain = _libraryDbContext.Authors.FirstOrDefault(n => n.Id == id);
-			if (authorWithDomain != null)
+			//Get Data From Database -Domain Model 
+			var allAuthorsDomain = _libraryDbContext.Authors.ToList();
+			//Map domain models to DTOs 
+			var allAuthorDTO = new List<AuthorDTO>();
+			foreach (var authorDomain in allAuthorsDomain)
 			{
-				var authorWithIdDTO = new AuthorWithBookAndPublisher
+				allAuthorDTO.Add(new AuthorDTO()
 				{
-					FullName = authorWithDomain.FullName
-				};
-				return authorWithIdDTO;
+					Id = authorDomain.Id,
+					FullName = authorDomain.FullName
+				});
 			}
-			return null;
+			//return DTOs 
+			return allAuthorDTO;
 		}
-
+		public AuthorNoIdDTO GetAuthorById(int id)
+		{
+			// get book Domain model from Db
+			var authorWithIdDomain = _libraryDbContext.Authors.FirstOrDefault(x => x.Id ==
+		   id);
+			if (authorWithIdDomain == null)
+			{
+				return null;
+			}
+			//Map Domain Model to DTOs 
+			var authorNoIdDTO = new AuthorNoIdDTO
+			{
+				FullName = authorWithIdDomain.FullName,
+			};
+			return authorNoIdDTO;
+		}
 		public AddAuthorRequestDTO AddAuthor(AddAuthorRequestDTO addAuthorRequestDTO)
 		{
-			var authorDomainModel = new Authors 
+			var authorDomainModel = new Authors
 			{
 				FullName = addAuthorRequestDTO.FullName,
 			};
+			//Use Domain Model to create Author 
 			_libraryDbContext.Authors.Add(authorDomainModel);
 			_libraryDbContext.SaveChanges();
-
 			return addAuthorRequestDTO;
 		}
-
-		public AddAuthorRequestDTO UpdateAuthorById(int id, AddAuthorRequestDTO authorDTO)
+		public AuthorNoIdDTO UpdateAuthorById(int id, AuthorNoIdDTO authorNoIdDTO)
 		{
 			var authorDomain = _libraryDbContext.Authors.FirstOrDefault(n => n.Id == id);
 			if (authorDomain != null)
 			{
-				authorDomain.FullName = authorDTO.FullName;
+				authorDomain.FullName = authorNoIdDTO.FullName;
 				_libraryDbContext.SaveChanges();
 			}
-
-			return authorDTO;
+			return authorNoIdDTO;
 		}
-
-		public Authors DeleteAuthorById(int id)
+		public Authors? DeleteAuthorById(int id)
 		{
 			var authorDomain = _libraryDbContext.Authors.FirstOrDefault(n => n.Id == id);
 			if (authorDomain != null)
@@ -72,7 +76,7 @@ namespace LibraryAPI.Repositories
 				_libraryDbContext.Authors.Remove(authorDomain);
 				_libraryDbContext.SaveChanges();
 			}
-			return authorDomain;
+			return null;
 		}
 	}
 }

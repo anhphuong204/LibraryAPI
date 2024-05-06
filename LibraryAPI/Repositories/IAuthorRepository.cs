@@ -6,10 +6,10 @@ namespace LibraryAPI.Repositories
 {
 	public interface IAuthorRepository
 	{
-		List<AuthorWithBookAndPublisher> GetAllAuthors();
-		AuthorWithBookAndPublisher GetAuthorById(int id);
+		List<AuthorDTO> GellAllAuthors();
+		AuthorNoIdDTO GetAuthorById(int id);
 		AddAuthorRequestDTO AddAuthor(AddAuthorRequestDTO addAuthorRequestDTO);
-		AddAuthorRequestDTO UpdateAuthorById(int id, AddAuthorRequestDTO authorDTO);
-		Authors DeleteAuthorById(int id);
+		AuthorNoIdDTO UpdateAuthorById(int id, AuthorNoIdDTO authorNoIdDTO);
+		Authors? DeleteAuthorById(int id);
 	}
 }

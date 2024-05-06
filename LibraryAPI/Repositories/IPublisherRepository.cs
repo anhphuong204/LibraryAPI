@@ -5,10 +5,11 @@ namespace LibraryAPI.Repositories
 {
 	public interface IPublisherRepository
 	{
-		List<AuthorWithBookAndPublisher> GetAllPublishers();
-		AuthorWithBookAndPublisher GetPublisherById(int id);
+		List<PublisherDTO> GetAllPublishers();
+		PublisherNoIdDTO GetPublisherById(int id);
 		AddPublisherRequestDTO AddPublisher(AddPublisherRequestDTO addPublisherRequestDTO);
-		AddPublisherRequestDTO UpdatePublisherById(int id, AddPublisherRequestDTO publisherDTO);
-		Publishers DeletePublisherById(int id);
+		PublisherNoIdDTO UpdatePublisherById(int id, PublisherNoIdDTO publisherNoIdDTO);
+		Publishers? DeletePublisherById(int id);
+
 	}
 }

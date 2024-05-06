@@ -4,58 +4,54 @@ using LibraryAPI.Models.DTO;
 using LibraryAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 
 namespace LibraryAPI.Controllers
 {
-	[ApiController]
 	[Route("api/[controller]")]
-	public class AuthorController : ControllerBase
+	[ApiController]
+	public class AuthorsController : ControllerBase
 	{
 		private readonly LibraryDbContext _libraryDbContext;
 		private readonly IAuthorRepository _authorRepository;
-
-		public AuthorController(LibraryDbContext libraryDbContext, IAuthorRepository authorRepository)
+		public AuthorsController(LibraryDbContext libraryDbContext, IAuthorRepository authorRepository)
 		{
 			_libraryDbContext = libraryDbContext;
 			_authorRepository = authorRepository;
 		}
-
-		[HttpGet("get_all_authors")]
-		public IActionResult GetAllAuthors()
+		[HttpGet("get-all-author")]
+		public IActionResult GetAllAuthor()
 		{
-			var allAuthors = _authorRepository.GetAllAuthors();
+			var allAuthors = _authorRepository.GellAllAuthors();
 			return Ok(allAuthors);
 		}
-
 		[HttpGet("get-author-by-id/{id}")]
-		public IActionResult GetAuthorById([FromRoute]int id)
+		public IActionResult GetAuthorById(int id)
 		{
-			var authorWithIdDTO = _authorRepository.GetAuthorById(id);
-			return Ok(authorWithIdDTO);
+			var authorWithId = _authorRepository.GetAuthorById(id);
+			return Ok(authorWithId);
 		}
-		
-
-		[HttpPost("add-author")]
-		public IActionResult AddAuthor([FromRoute] AddAuthorRequestDTO addAuthorRequestDTO)
+		[HttpPost("add - author")]
+		public IActionResult AddAuthors([FromBody] AddAuthorRequestDTO
+	   addAuthorRequestDTO)
 		{
 			var authorAdd = _authorRepository.AddAuthor(addAuthorRequestDTO);
-			return Ok(authorAdd);
+			return Ok();
 		}
-		
-
 		[HttpPut("update-author-by-id/{id}")]
-		public IActionResult UpdateAuthorById(int id, [FromBody] AddAuthorRequestDTO authorDTO)
+		public IActionResult UpdateBookById(int id, [FromBody] AuthorNoIdDTO
+	   authorDTO)
 		{
-			var updateAuthor = _authorRepository.UpdateAuthorById(id, authorDTO);
-			return Ok(updateAuthor);
+			var authorUpdate = _authorRepository.UpdateAuthorById(id, authorDTO);
+			return Ok(authorUpdate);
 		}
-	
 		[HttpDelete("delete-author-by-id/{id}")]
-		public IActionResult DeleteAuthorById(int id)
+		public IActionResult DeleteBookById(int id)
 		{
-			var deleteAuthor = _authorRepository.DeleteAuthorById(id);
-			return Ok(deleteAuthor);
+			var authorDelete = _authorRepository.DeleteAuthorById(id);
+			return Ok();
 		}
 	}
 }
+

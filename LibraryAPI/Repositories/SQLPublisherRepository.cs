@@ -9,62 +9,63 @@ namespace LibraryAPI.Repositories
 {
 	public class SQLPublisherRepository : IPublisherRepository
 	{
-		private readonly LibraryDbContext _libraryDbContext;
-
+		private readonly LibraryDbContext _libraryDbContext ;
 		public SQLPublisherRepository(LibraryDbContext libraryDbContext)
 		{
 			_libraryDbContext = libraryDbContext;
 		}
-
-		public List<AuthorWithBookAndPublisher> GetAllPublishers()
+		public List<PublisherDTO> GetAllPublishers()
 		{
-			return _libraryDbContext.Publishers
-				.Select(publisher => new AuthorWithBookAndPublisher
-				{
-					FullName = publisher.FullName
-				}).ToList();
-		}
-
-		public AuthorWithBookAndPublisher GetPublisherById(int id)
-		{
-			var publisher = _libraryDbContext.Publishers.FirstOrDefault(p => p.Id == id);
-			if (publisher != null)
+			//Get Data From Database -Domain Model
+			var allPublishersDomain = _libraryDbContext.Publishers.ToList();
+			//Map domain models to DTOs
+			var allPublisherDTO = new List<PublisherDTO>();
+			foreach (var publisherDomain in allPublishersDomain)
 			{
-				return new AuthorWithBookAndPublisher { FullName = publisher.FullName };
+				allPublisherDTO.Add(new PublisherDTO()
+				{
+					Id = publisherDomain.Id,
+					FullName = publisherDomain.FullName
+				});
 			}
-			return null; 
+			return allPublisherDTO;
 		}
-
+		public PublisherNoIdDTO GetPublisherById(int id)
+		{
+			// get book Domain model from Db
+			var publisherWithIdDomain = _libraryDbContext.Publishers.FirstOrDefault(x => x.Id == id);
+			if (publisherWithIdDomain != null)
+			{ //Map Domain Model to DTOs
+				var publisherNoIdDTO = new PublisherNoIdDTO
+				{
+					FullName = publisherWithIdDomain.FullName,
+				};
+				return publisherNoIdDTO;
+			}
+			return null;
+		}
 		public AddPublisherRequestDTO AddPublisher(AddPublisherRequestDTO addPublisherRequestDTO)
 		{
-			if (addPublisherRequestDTO == null)
-			{
-				throw new ArgumentNullException(nameof(addPublisherRequestDTO));
-			}
-
-			var publisherDomainModel = new Publishers
+			var publisherDomainModel = new Publishers 
 			{
 				FullName = addPublisherRequestDTO.FullName,
 			};
+			//Use Domain Model to create Book
 			_libraryDbContext.Publishers.Add(publisherDomainModel);
 			_libraryDbContext.SaveChanges();
-
 			return addPublisherRequestDTO;
 		}
-
-		public AddPublisherRequestDTO UpdatePublisherById(int id, AddPublisherRequestDTO publisherDTO)
+		public PublisherNoIdDTO UpdatePublisherById(int id, PublisherNoIdDTO publisherNoIdDTO)
 		{
 			var publisherDomain = _libraryDbContext.Publishers.FirstOrDefault(n => n.Id == id);
 			if (publisherDomain != null)
 			{
-				publisherDomain.FullName = publisherDTO.FullName;
+				publisherDomain.FullName = publisherNoIdDTO.FullName;
 				_libraryDbContext.SaveChanges();
 			}
-
-			return publisherDTO;
+			return null;
 		}
-
-		public Publishers DeletePublisherById(int id)
+		public Publishers? DeletePublisherById(int id)
 		{
 			var publisherDomain = _libraryDbContext.Publishers.FirstOrDefault(n => n.Id == id);
 			if (publisherDomain != null)
@@ -72,7 +73,7 @@ namespace LibraryAPI.Repositories
 				_libraryDbContext.Publishers.Remove(publisherDomain);
 				_libraryDbContext.SaveChanges();
 			}
-			return publisherDomain;
+			return null;
 		}
 	}
 }

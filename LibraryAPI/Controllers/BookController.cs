@@ -8,27 +8,39 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Text.Json;
 
 namespace LibraryAPI.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
+	[Authorize]
 	public class BookController : ControllerBase
 	{
 		private readonly LibraryDbContext _libraryDbContext;
 		private readonly IBookRepository _bookRepository;
+		private readonly ILogger<BookController> _logger;
 
-		public BookController(LibraryDbContext libraryDbContext, IBookRepository bookRepository)
+		public BookController(LibraryDbContext libraryDbContext, IBookRepository bookRepository, ILogger<BookController> logger)
 		{
 			_libraryDbContext = libraryDbContext;
 			_bookRepository = bookRepository;
-
+			_logger = logger;
 		}
 
 		[HttpGet("get_all_books")]
-		public IActionResult GetAll()
+		[Authorize(Roles = "Read")]
+		public IActionResult GetAll([FromQuery] string? filterOn, [FromQuery] string? filterQuery,[FromQuery] string? sortBy, [FromQuery] bool isAscending,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 100)
 		{
-			var allBooks = _bookRepository.GetAllBooks();
+			_logger.LogInformation("GetAll Book Action method was invoked");
+			_logger.LogWarning("This is a warnung log");
+			_logger.LogError("This is a error log");
+			// su dung reposity pattern 
+			var allBooks = _bookRepository.GetAllBooks(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+			
+			//debug
+			_logger.LogInformation($"Finished GetAllBook request with data{JsonSerializer.Serialize(allBooks)}"); 
+
 			return Ok(allBooks);
 		}
 
@@ -61,6 +73,7 @@ namespace LibraryAPI.Controllers
 
 
 		[HttpPut("update-book-by-id/{id}")]
+		[Authorize(Roles = "Write")]
 		public IActionResult UpdateBookById(int id, [FromBody] AddBookRequestDTO bookDTO)
 		{
 			var updateBook = _bookRepository.UpdateBookById(id, bookDTO);
@@ -68,6 +81,7 @@ namespace LibraryAPI.Controllers
 		}
 
 		[HttpDelete("delete-book-by-id/{id}")]
+		[Authorize(Roles = "Write")]
 		public IActionResult DeleteBookById(int id)
 		{
 			var deleteBook = _bookRepository.DeleteBookById(id);

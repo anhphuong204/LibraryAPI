@@ -2,6 +2,7 @@
 using LibraryAPI.Models;
 using LibraryAPI.Models.DTO;
 using LibraryAPI.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,6 +12,7 @@ namespace LibraryAPI.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class AuthorsController : ControllerBase
 	{
 		private readonly LibraryDbContext _libraryDbContext;

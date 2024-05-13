@@ -14,23 +14,49 @@ namespace LibraryAPI.Repositories
 			_libraryDbContext = libraryDbContext;
 		}
 
-		public List<BookWithAuthorAndPublisherDTO> GetAllBooks() 
+		public List<BookWithAuthorAndPublisherDTO> GetAllBooks(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 1000)
+
+
 		{
-			var allBooks = _libraryDbContext.Books.Select(Book => new BookWithAuthorAndPublisherDTO()
+			var allBooks = _libraryDbContext.Books.Select(Books => new BookWithAuthorAndPublisherDTO()
 			{
-				Id = Book.Id,
-				Title = Book.Title,
-				Description = Book.Description,
-				IsRead = Book.IsRead,
-				DateRead = Book.IsRead ?? false ? Book.DateRead : null,
-				Rate = Book.IsRead ?? false ? Book.Rate : null,
-				Genre = Book.Genre,
-				CoverUrl = Book.CoverUrl,
-				PublisherName = Book.Publisher.FullName,
-				AuthorName = Book.Book_Authors.Select(n => n.Author.FullName).ToList()
-			}).ToList();
-			return allBooks;
+				Id = Books.Id,
+				Title = Books.Title,
+				Description = Books.Description,
+				IsRead = Books.IsRead,
+				DateRead = Books.IsRead ?? false ? Books.DateRead : null,
+				Rate = Books.IsRead ?? false ? Books.Rate : null,
+				Genre = Books.Genre,
+				CoverUrl = Books.CoverUrl,
+				PublisherName = Books.Publisher.FullName,
+				AuthorName = Books.Book_Authors.Select(n => n.Author.FullName).ToList()
+			}).AsQueryable();
+			//filtering
+			if (string.IsNullOrWhiteSpace(filterOn) == false &&
+		   string.IsNullOrWhiteSpace(filterQuery) == false)
+			{
+				if (filterOn.Equals("title", StringComparison.OrdinalIgnoreCase))
+				{
+					allBooks = allBooks.Where(x => x.Title.Contains(filterQuery));
+				}
+			}
+
+			//sorting
+			if (string.IsNullOrWhiteSpace(sortBy) == false)
+			{
+				if (sortBy.Equals("title", StringComparison.OrdinalIgnoreCase))
+				{
+					allBooks = isAscending ? allBooks.OrderBy(x => x.Title) :
+				   allBooks.OrderByDescending(x => x.Title);
+				}
+			}
+
+			//pagination
+			var skipResults = (pageNumber - 1) * pageSize;
+			return allBooks.Skip(skipResults).Take(pageSize).ToList();
+
 		}
+
 
 		public BookWithAuthorAndPublisherDTO GetBookById(int id) 
 		{

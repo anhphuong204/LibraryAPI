@@ -2,6 +2,7 @@
 using LibraryAPI.Models;
 using LibraryAPI.Models.DTO;
 using LibraryAPI.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
@@ -11,6 +12,7 @@ namespace LibraryAPI.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class PublishersController : ControllerBase
 	{
 		private readonly LibraryDbContext _libraryDbContext;
